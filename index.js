@@ -1,5 +1,18 @@
 const { Telegraf, Markup } = require('telegraf');
+const http = require('http');
 
+// Створюємо простий вебсервер, щоб Render бачив відкритий порт і не вимикав сервіс
+const server = http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('Bot is running 24/7!\n');
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`Web server is listening on port ${PORT}`);
+});
+
+// Підключаємо бота через змінну середовища з Render
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 bot.start((ctx) => {
