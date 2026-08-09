@@ -24,7 +24,7 @@ bot.start((ctx) => {
             parse_mode: 'Markdown',
             ...Markup.inlineKeyboard([
                 [Markup.button.callback('🔮 Рунічний простір', 'runes')],
-                [Markup.button.callback('🎭 Визначення архетипів', 'archetypes')],
+                [Markup.button.callback('🎭 Визначення архетипів', 'archetypes-app-theta.vercel.app')],
                 [Markup.button.url('🧠 Кишеньковий психолог (Тінь)', 'https://t.me/wesync_ua_bot')],
                 [Markup.button.url('🌙 Сонник (Тлумачення снів)', 'https://dreams-app-gold.vercel.app/')],
                 [Markup.button.url('💬 Зв’язатися з автором', 'https://t.me/runes_valeriy')]
