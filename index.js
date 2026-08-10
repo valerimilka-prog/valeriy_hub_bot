@@ -103,7 +103,7 @@ bot.on('web_app_data', async (ctx) => {
 bot.on('web_app_data', async (ctx) => {
   try {
     // 🚨 ВСТАВ СВІЙ ЧИСЛОВИЙ ID СЮДИ (ТІЛЬКИ ЦИФРИ В ЛАПКАХ):
-    const ADMIN_ID = 'ТВІЙ_ЧИСЛОВИЙ_ID';
+    const ADMIN_ID = '8046369329';
 
     // Правильний метод зчитування даних у Telegraf
     const rawData = ctx.message.web_app_data.data;
