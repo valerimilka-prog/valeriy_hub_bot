@@ -102,13 +102,17 @@ bot.on('web_app_data', async (ctx) => {
 // ПЕРЕХОПЛЕННЯ ДАНИХ З АНКЕТИ
 bot.on('web_app_data', async (ctx) => {
   try {
-    const rawData = ctx.webAppData.data();
+    // 🚨 ВСТАВ СВІЙ ЧИСЛОВИЙ ID СЮДИ (ТІЛЬКИ ЦИФРИ В ЛАПКАХ):
+    const ADMIN_ID = 'ТВІЙ_ЧИСЛОВИЙ_ID';
+
+    // Правильний метод зчитування даних у Telegraf
+    const rawData = ctx.message.web_app_data.data;
     const data = JSON.parse(rawData);
     
     // Бот бере ключ (наприклад, ART) і шукає його в словнику
     const archKey = data.archKey || 'ART';
     
-    // Словник, який ми з тобою зібрали
+    // Твій повний словник архетипів
     const archetypesData = {
       ART: { name: "Артеміда", slavic: "Молода Войовниця / Морана", norse: "Скаді", core: "Архетип незалежної жінки яка знає чого хоче і рухається прямо до мети без оглядки на чужу думку. Її смисл — у власній місії а не у стосунках." },
       ATH: { name: "Афіна", slavic: "Мудра Волхвиня / Жриця-Захисниця", norse: "Норни", core: "Архетип жінки-стратега яка мислить логічно і ефективно. Часто обирає чоловіче середовище де цінують компетентність." },
@@ -129,7 +133,7 @@ bot.on('web_app_data', async (ctx) => {
 
     const archInfo = archetypesData[archKey] || { name: "Невідомий архетип", slavic: "-", norse: "-", core: "Опис формується..." };
 
-    // Відправляємо клієнту результат
+    // 1. ВІДПРАВКА КЛІЄНТУ (У ЧАТ)
     const userMessage = `🎭 **Твій провідний архетип: ${archInfo.name}**\n` +
                         `🏛 *Відповідники:* ${archInfo.slavic} | ${archInfo.norse}\n\n` +
                         `📖 **Суть:**\n${archInfo.core}\n\n` +
@@ -143,11 +147,20 @@ bot.on('web_app_data', async (ctx) => {
       ])
     });
 
-    // Тобі в особисті (або в консоль) летить шифр
-    console.log(`НОВИЙ РЕЗУЛЬТАТ! Шифр: ${data.code}`);
+    // 2. ВІДПРАВКА АДМІНУ (ТОБІ)
+    const adminMessage = `📥 **НОВИЙ РЕЗУЛЬТАТ!**\n` +
+                         `👤 Клієнт: ${data.clientName || 'Не вказано'}\n` +
+                         `🚻 Стать: ${data.gender || '-'}\n` +
+                         `🔑 Архетип: ${archInfo.name} (${archKey})\n\n` +
+                         `🔐 **ШИФР:**\n<code>${data.code}</code>`;
+
+    if (ADMIN_ID && ADMIN_ID !== '8046369329') {
+      await bot.telegram.sendMessage(ADMIN_ID, adminMessage, { parse_mode: 'HTML' });
+    }
 
   } catch (e) {
-    console.error('Помилка:', e);
+    console.error('Помилка обробки Web App даних:', e);
+    await ctx.reply('⚠️ Сталася помилка при розшифровці результату. Будь ласка, зверніться до автора: @runes_valeriy');
   }
 });
 
