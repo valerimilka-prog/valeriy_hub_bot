@@ -38,13 +38,21 @@ const archetypesData = {
 bot.start((ctx) => {
     const userName = ctx.from.first_name || 'друг';
     
+    // 1. Відправляємо нижню клавіатуру СПЕЦІАЛЬНО для анкети (тільки так працює передача даних)
+    ctx.reply(
+        `Вітаю, ${userName}! 🌿\n\nЦе Простір Глибинного Самопізнання.\n\n👇 Щоб пройти тест на визначення архетипу, тисни велику кнопку внизу екрана!`,
+        Markup.keyboard([
+            [Markup.button.webApp('🎭 Пройти тест на Архетип', 'https://archetypes-app-whatever.vercel.app/')] // ВСТАВ СВОЄ ПОСИЛАННЯ ТУТ
+        ]).resize()
+    );
+
+    // 2. Відправляємо звичне меню для всіх інших інструментів під текстом
     return ctx.reply(
-        `Вітаю, ${userName}! 🌿\n\nЦе Простір Глибинного Самопізнання — твоя точка збору для роботи з підсвідомістю, міфологією та внутрішніми станами.\n\nОбери інструмент, з якого хочеш почати:`,
+        `Або обери інший інструмент з меню:`,
         {
             parse_mode: 'Markdown',
             ...Markup.inlineKeyboard([
                 [Markup.button.callback('🔮 Рунічний простір', 'runes')],
-                [Markup.button.url('🎭 Визначення архетипів', 'archetypes-app-2.vercel.app')],
                 [Markup.button.url('🧠 Кишеньковий психолог (Тінь)', 'https://t.me/wesync_ua_bot')],
                 [Markup.button.url('🌙 Сонник (Тлумачення снів)', 'https://dreams-app-gold.vercel.app/')],
                 [Markup.button.url('💬 Зв’язатися з автором', 'https://t.me/runes_valeriy')]
