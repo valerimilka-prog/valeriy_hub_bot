@@ -128,8 +128,8 @@ bot.on('web_app_data', async (ctx) => {
                          `🚻 Стать: ${data.gender || '-'}\n` +
                          `🔑 Архетип: ${archInfo.name} (${archKey})\n\n` +
                          `🔐 **ШИФР:**\n<code>${data.code}</code>`;
-
-    if (ADMIN_ID && ADMIN_ID !== '8046369329') {
+      
+    if ( ADMIN_ID ) {
       await bot.telegram.sendMessage(ADMIN_ID, adminMessage, { parse_mode: 'HTML' });
     }
 
