@@ -76,7 +76,7 @@ for (const [key, text] of Object.entries(voices_actions)) {
 // Прийом даних від анкети (Freemium-видача)
 bot.on('web_app_data', async (ctx) => {
   try {
-    const rawData = ctx.webAppData.data();
+    const rawData = ctx.message.web_app_data.data;
     const data = JSON.parse(rawData);
     
     const archKey = data.archKey || 'ART';
