@@ -42,7 +42,7 @@ bot.start((ctx) => {
     ctx.reply(
         `Вітаю, ${userName}! 🌿\n\nЦе Простір Глибинного Самопізнання.\n\n👇 Щоб пройти тест на визначення архетипу, тисни велику кнопку внизу екрана!`,
         Markup.keyboard([
-            [Markup.button.webApp('🎭 Пройти тест на Архетип', 'https://archetypes-app-3.vercel.app/')] // ВСТАВ СВОЄ ПОСИЛАННЯ ТУТ
+            [Markup.button.webApp('🎭 Пройти тест на Архетип', 'https://archetypes-app-4.vercel.app/')] // ВСТАВ СВОЄ ПОСИЛАННЯ ТУТ
         ]).resize()
     );
 
