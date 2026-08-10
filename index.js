@@ -73,31 +73,6 @@ for (const [key, text] of Object.entries(voices_actions)) {
     });
 }
 
-// Прийом даних від анкети (Freemium-видача)
-bot.on('web_app_data', async (ctx) => {
-  try {
-    const rawData = ctx.message.web_app_data.data;
-    const data = JSON.parse(rawData);
-    
-    const archKey = data.archKey || 'ART';
-    const archInfo = archetypesData[archKey] || { name: "Архетип", slavic: "-", norse: "-", core: "Опис..." };
-
-    const userMessage = `🎭 **Твій провідний архетип: ${archInfo.name}**\n` +
-                        `🏛 *Відповідники:* ${archInfo.slavic} | ${archInfo.norse}\n\n` +
-                        `📖 **Суть:**\n${archInfo.core}\n\n` +
-                        `✨ *Це базовий результат.* Хочеш отримати повний PDF-розбір із тіньовими сторонами?\n\n` +
-                        `👇 Звернися до автора!`;
-
-    await ctx.reply(userMessage, {
-      parse_mode: 'Markdown',
-      ...Markup.inlineKeyboard([
-        [Markup.button.url('📩 Замовити повний розбір у автора', 'https://t.me/runes_valeriy')]
-      ])
-    });
-  } catch (e) {
-    console.error('Помилка обробки Web App даних:', e);
-  }
-});
 
 // ПЕРЕХОПЛЕННЯ ДАНИХ З АНКЕТИ
 bot.on('web_app_data', async (ctx) => {
