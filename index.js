@@ -113,12 +113,14 @@ bot.on('web_app_data', async (ctx) => {
                         `🏛 *Відповідники:* ${archInfo.slavic} | ${archInfo.norse}\n\n` +
                         `📖 **Суть:**\n${archInfo.core}\n\n` +
                         `✨ *Це лише базовий результат.* Хочеш дізнатися про свої тіньові сторони, ресурси та розбір Аніми/Анімуса?\n\n` +
-                        `👇 Тисни нижче, щоб звернутися до автора за повним PDF-розбором!`;
+                        `👇 Тисни нижче, щоб звернутися до автора за повним PDF-розбором!\n\n` +
+                        `💳 **Вартість повного розбору:** вільний донат (рекомендовано від 100 грн).`;
 
     await ctx.reply(userMessage, {
       parse_mode: 'Markdown',
       ...Markup.inlineKeyboard([
-        [Markup.button.url('📩 Замовити повний розбір', 'https://t.me/runes_valeriy')]
+        [Markup.button.url('📩 Замовити повний розбір', 'https://t.me/runes_valeriy')],
+        [Markup.button.url('☕ Підтримати автора (Donatello)', 'https://donatello.to/dity_dazhbozhi')]
       ])
     });
 
