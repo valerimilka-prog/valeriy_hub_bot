@@ -37,7 +37,6 @@ const archetypesData = {
 // === ГОЛОВНЕ МЕНЮ ТА КЛАВІАТУРА ===
 bot.start(async (ctx) => {
     const userName = ctx.from.first_name || 'друг';
-    const bannerUrl = 'https://i.ibb.co/3s6k5pM/yggdrasil-banner.jpg'; 
 
     const welcomeText = 
     `Вітаю, ${userName}! 🌿\n\n` +
@@ -46,8 +45,8 @@ bot.start(async (ctx) => {
     `Обери інструмент на панелі внизу:`;
 
     try {
-        await ctx.replyWithPhoto(bannerUrl, {
-            caption: welcomeText,
+        // Замінили replyWithPhoto на звичайний reply, щоб не залежати від зовнішніх картинок
+        await ctx.reply(welcomeText, {
             parse_mode: 'Markdown',
             ...Markup.keyboard([
                 [Markup.button.webApp('🎭 Архетипи', 'https://archetypes-app-4.vercel.app/'), Markup.button.webApp('🌙 Сонник', 'https://dreams-app-gold.vercel.app/')],
