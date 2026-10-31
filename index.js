@@ -45,26 +45,22 @@ bot.start(async (ctx) => {
     `Твоя точка збору для роботи з підсвідомістю, міфологією та внутрішніми станами.\n` +
     `Обери інструмент на панелі внизу:`;
 
-    await ctx.replyWithPhoto(bannerUrl, {
-        caption: welcomeText,
-        parse_mode: 'Markdown',
-        reply_markup: {
-            keyboard: [
-                [
-                  { text: '🎭 Архетипи', web_app: { url: 'https://archetypes-app-4.vercel.app/' } },
-                  { text: '🌙 Сонник', web_app: { url: 'https://dreams-app-gold.vercel.app/' } }
-                ],
-                [ { text: '🧠 Кишеньковий психолог (Тінь)' } ],
-                [ { text: '💬 Зв’язатися з автором' } ]
-            ],
-            resize_keyboard: true,
-            is_persistent: true
-        }
-    });
+    try {
+        await ctx.replyWithPhoto(bannerUrl, {
+            caption: welcomeText,
+            parse_mode: 'Markdown',
+            ...Markup.keyboard([
+                [Markup.button.webApp('🎭 Архетипи', 'https://archetypes-app-4.vercel.app/'), Markup.button.webApp('🌙 Сонник', 'https://dreams-app-gold.vercel.app/')],
+                ['🧠 Кишеньковий психолог', '💬 Зв’язатися з автором']
+            ]).resize()
+        });
+    } catch (e) {
+        console.error("Помилка відправки стартового повідомлення: ", e);
+    }
 });
 
 // Обробка текстових кнопок з нижньої клавіатури
-bot.hears('🧠 Кишеньковий психолог (Тінь)', (ctx) => {
+bot.hears('🧠 Кишеньковий психолог', (ctx) => {
     ctx.reply('Щоб розпочати роботу з Тінню, переходь до окремого бота WeSync:', 
         Markup.inlineKeyboard([Markup.button.url('Перейти до Психолога', 'https://t.me/wesync_ua_bot')])
     );
