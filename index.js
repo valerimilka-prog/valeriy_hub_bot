@@ -1,118 +1,953 @@
-const { Telegraf, Markup } = require('telegraf');
-const http = require('http');
-
-// Створюємо простий вебсервер для підтримки роботи 24/7
-const server = http.createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Bot is running 24/7!\n');
-});
-
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Web server is listening on port ${PORT}`);
-});
-
-const bot = new Telegraf(process.env.BOT_TOKEN);
-const ADMIN_ID = '8046369329';
-
-// === СЛОВНИК АРХЕТИПІВ ===
-const archetypesData = {
-  ART: { name: "Артеміда", slavic: "Молода Войовниця / Морана", norse: "Скаді", core: "Архетип незалежної жінки яка знає чого хоче і рухається прямо до мети без оглядки на чужу думку." },
-  ATH: { name: "Афіна", slavic: "Мудра Волхвиня / Жриця-Захисниця", norse: "Норни", core: "Архетип жінки-стратега яка мислить логічно і ефективно." },
-  HES: { name: "Гестія", slavic: "Берегиня / Жриця Священного Вогню", norse: "-", core: "Архетип жінки яка живе зсередини назовні, її внутрішній центр є джерелом спокою." },
-  HER: { name: "Гера", slavic: "Лада-Цариця / Богиня Шлюбного Союзу", norse: "Фрігг", core: "Архетип жінки для якої союз є центральним сенсом існування." },
-  DEM: { name: "Деметра", slavic: "Мати Сира Земля / Мокоша", norse: "Нертус", core: "Архетип матері яка дає безумовно. Все навколо неї росте." },
-  PER: { name: "Персефона", slavic: "Дівиця між Яв і Нав", norse: "Хель", core: "Архетип жінки яка трансформується через страждання, провідник між світами." },
-  APH: { name: "Афродіта", slavic: "Лада — Жива Творча Сила", norse: "Фрейя", core: "Алхімічна Богиня кохання і краси. Всі з ким вона взаємодіє — трансформуються." },
-  ZEV: { name: "Зевс", slavic: "Перун", norse: "Тор / Одін", core: "Архетип природженого лідера який мислить стратегічно і потребує контролю." },
-  POS: { name: "Посейдон", slavic: "Дух Вод / Темний Велес", norse: "Ньйорд", core: "Архетип чоловіка з потужним емоційним ядром. Коли спокійний — дає простір, коли бушує — руйнує." },
-  AID: { name: "Аїд", slavic: "Велес-Нав", norse: "Хель", core: "Архетип інтроверта що живе у своєму внутрішньому світі, розуміє темряву." },
-  APL: { name: "Аполлон", slavic: "Дажбог / Хорс", norse: "Бальдр", core: "Архетип раціонального перфекціоніста. Все має бути правильним і досконалим." },
-  HERMES: { name: "Гермес", slavic: "Велес-Слово", norse: "Локі", core: "Архетип посередника між світами. Швидкий, дотепний, знаходить мову з будь-ким." },
-  ARS: { name: "Арес", slavic: "Ярило / Перун-Воїн", norse: "Тюр", core: "Архетип воїна в польових умовах — тіло, інстинкт, пристрасть." },
-  HEF: { name: "Гефест", slavic: "Сварог / Сварожич", norse: "-", core: "Архетип майстра який перетворює власний біль на мистецтво." },
-  DIO: { name: "Діоніс", slavic: "Купайло / Містичний Ярило", norse: "-", core: "Живе через відчуття і злиття з іншими, шукає досвіди екстазу." }
-};
-
-// === ГОЛОВНЕ МЕНЮ ТА КЛАВІАТУРА ===
-bot.start(async (ctx) => {
-    const userName = ctx.from.first_name || 'друг';
-
-    const welcomeText = 
-    `Вітаю, ${userName}! 🌿\n\n` +
-    `Це **Простір Глибинного Самопізнання**.\n\n` +
-    `Твоя точка збору для роботи з підсвідомістю, міфологією та внутрішніми станами.\n` +
-    `Обери інструмент на панелі внизу:`;
-
-    try {
-        // Замінили replyWithPhoto на звичайний reply, щоб не залежати від зовнішніх картинок
-        await ctx.reply(welcomeText, {
-            parse_mode: 'Markdown',
-            ...Markup.keyboard([
-                [Markup.button.webApp('🎭 Архетипи', 'https://archetypes-app-4.vercel.app/'), Markup.button.webApp('🌙 Сонник', 'https://dreams-app-gold.vercel.app/')],
-                ['🧠 Кишеньковий психолог', '💬 Зв’язатися з автором']
-            ]).resize()
-        });
-    } catch (e) {
-        console.error("Помилка відправки стартового повідомлення: ", e);
-    }
-});
-
-// Обробка текстових кнопок з нижньої клавіатури
-bot.hears('🧠 Кишеньковий психолог', (ctx) => {
-    ctx.reply('Щоб розпочати роботу з Тінню, переходь до окремого бота WeSync:', 
-        Markup.inlineKeyboard([Markup.button.url('Перейти до Психолога', 'https://t.me/wesync_ua_bot')])
-    );
-});
-
-bot.hears('💬 Зв’язатися з автором', (ctx) => {
-    ctx.reply('Напиши мені сюди для замовлення особистих розборів або консультацій:', 
-        Markup.inlineKeyboard([Markup.button.url('Написати автору', 'https://t.me/runes_valeriy')])
-    );
-});
-
-// === ПЕРЕХОПЛЕННЯ ДАНИХ З АНКЕТИ АРХЕТИПІВ ===
-bot.on('web_app_data', async (ctx) => {
-  try {
-    const rawData = ctx.message.web_app_data.data;
-    const data = JSON.parse(rawData);
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дзеркало Душі — Простір глибинного самопізнання</title>
     
-    if(data.type === 'dream_result') return;
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Cormorant+Unicase:wght@600;700&family=Ruslan+Display&display=swap" rel="stylesheet">
 
-    const archKey = data.archKey || 'ART';
-    const archInfo = archetypesData[archKey] || { name: "Невідомий", slavic: "-", norse: "-", core: "-" };
+    <style>
+        @font-face {
+            font-family: 'Rutenia';
+            src: url('Rutenia.woff2') format('woff2'), url('Rutenia.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
 
-    const userMessage = `🎭 **Твій провідний архетип: ${archInfo.name}**\n` +
-                        `🏛 *Відповідники:* ${archInfo.slavic} | ${archInfo.norse}\n\n` +
-                        `📖 **Суть:**\n${archInfo.core}\n\n` +
-                        `✨ *Це лише базовий результат.* Хочеш дізнатися про свої тіньові сторони, ресурси та розбір Аніми/Анімуса?\n\n` +
-                        `💳 **Вартість повного PDF-розбору:** вільний донат (від 100 грн).\n\n` +
-                        `👇 Після донату тисни «Замовити повний розбір» та надішли скріншот оплати!`;
+        :root {
+            --bg-obsidian: #030806;
+            --bg-emerald: #071912;
+            --card-emerald: rgba(9, 28, 20, 0.88);
+            --gold-primary: #d4af37;
+            --gold-dim: rgba(212, 175, 55, 0.22);
+            --gold-light: #f3e5ab;
+            --gold-dark: #8c6d1f;
+            --emerald-glow: #10b981;
+            --text-main: #e6dfd3;
+            --text-muted: #9ba8a1;
+            --font-title: 'Rutenia', 'Cormorant Unicase', 'Ruslan Display', serif;
+            --font-body: 'Cormorant Garamond', Georgia, serif;
+        }
 
-    await ctx.reply(userMessage, {
-      parse_mode: 'Markdown',
-      ...Markup.inlineKeyboard([
-        [Markup.button.url('📩 Замовити повний розбір', 'https://t.me/runes_valeriy')],
-        [Markup.button.url('☕ Підтримати автора', 'https://donatello.to/dity_dazhbozhi')]
-      ])
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-obsidian);
+            background-image: 
+                radial-gradient(circle at 50% 15%, rgba(16, 62, 45, 0.65) 0%, rgba(7, 25, 18, 0.9) 55%, var(--bg-obsidian) 95%),
+                /* Восьмигранна зірка Алатир / Північна зоря */
+                url("data:image/svg+xml,%3Csvg width='240' height='240' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23d4af37' stroke-width='0.8' stroke-opacity='0.15'%3E%3Cpolygon points='100,10 115,75 165,35 125,85 190,100 125,115 165,165 115,125 100,190 85,125 35,165 75,115 10,100 75,85 35,35 85,75'/%3E%3Ccircle cx='100' cy='100' r='30'/%3E%3Ccircle cx='100' cy='100' r='60' stroke-dasharray='4 4'/%3E%3C/g%3E%3C/svg%3E");
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            font-size: 18px;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .bg-heraldic-center {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 75vw;
+            max-width: 700px;
+            height: auto;
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .corner-ornament {
+            position: fixed;
+            width: 150px;
+            height: 150px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.28;
+        }
+        .corner-tl { top: 10px; left: 10px; }
+        .corner-tr { top: 10px; right: 10px; transform: scaleX(-1); }
+        .corner-bl { bottom: 10px; left: 10px; transform: scaleY(-1); }
+        .corner-br { bottom: 10px; right: 10px; transform: scale(-1, -1); }
+
+        .portal-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 35px 20px 60px;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #16382b 0%, #091913 100%);
+            color: var(--gold-primary);
+            border: 1px solid var(--gold-primary);
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-family: var(--font-title);
+            font-size: 16px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-gold:hover {
+            background: var(--gold-primary);
+            color: var(--bg-obsidian);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+        }
+
+        .hero-header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            padding: 20px 10px;
+            border-top: 1px solid var(--gold-dim);
+            border-bottom: 1px solid var(--gold-dim);
+            background: radial-gradient(circle, rgba(9, 29, 21, 0.75) 0%, transparent 80%);
+        }
+
+        .ornament-svg {
+            width: 100%;
+            max-width: 520px;
+            height: 34px;
+            margin: 8px auto;
+            display: block;
+            fill: none;
+            stroke: var(--gold-primary);
+        }
+
+        h1.main-title {
+            font-family: var(--font-title);
+            font-size: clamp(34px, 6vw, 56px);
+            color: var(--gold-primary);
+            margin: 5px 0;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.9), 0 0 25px rgba(212, 175, 55, 0.25);
+            font-weight: 700;
+        }
+
+        .sub-title {
+            font-size: clamp(19px, 3vw, 25px);
+            color: var(--gold-light);
+            font-style: italic;
+            margin: 0;
+            letter-spacing: 1.5px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: rgba(9, 26, 19, 0.8);
+            color: var(--text-muted);
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-family: var(--font-title);
+            font-size: 18px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active, .tab-btn:hover {
+            background: linear-gradient(135deg, #153c2c 0%, #081812 100%);
+            color: var(--gold-primary);
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 18px rgba(16, 185, 129, 0.25), inset 0 0 10px rgba(212, 175, 55, 0.15);
+        }
+
+        .section-heading {
+            font-family: var(--font-title);
+            color: var(--gold-light);
+            font-size: 26px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.35);
+            padding-bottom: 8px;
+            margin: 40px 0 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .project-card {
+            background: var(--card-emerald);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            border-radius: 14px;
+            padding: 28px 24px;
+            position: relative;
+            transition: all 0.35s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+        }
+
+        .project-card::before {
+            content: "❖";
+            position: absolute;
+            top: 10px;
+            right: 14px;
+            color: rgba(212, 175, 55, 0.4);
+            font-size: 18px;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold-primary);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.85), 0 0 25px rgba(212, 175, 55, 0.25);
+        }
+
+        .card-icon {
+            font-size: 34px;
+            color: var(--gold-primary);
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-family: var(--font-title);
+            font-size: 23px;
+            color: var(--gold-primary);
+            margin: 0 0 10px 0;
+            letter-spacing: 0.5px;
+        }
+
+        .card-desc {
+            color: var(--text-main);
+            font-size: 17px;
+            margin-bottom: 24px;
+            flex-grow: 1;
+        }
+
+        .runes-gallery-wrapper {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .runes-carousel {
+            display: flex;
+            gap: 22px;
+            overflow-x: auto;
+            padding: 15px 5px 30px;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: thin;
+            scrollbar-color: var(--gold-primary) var(--bg-obsidian);
+        }
+
+        .runes-carousel::-webkit-scrollbar { height: 8px; }
+        .runes-carousel::-webkit-scrollbar-track { background: var(--bg-obsidian); border-radius: 4px; }
+        .runes-carousel::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 4px; }
+
+        .rune-card-9x16 {
+            flex: 0 0 250px;
+            aspect-ratio: 9 / 16;
+            background: linear-gradient(160deg, #0d291e 0%, #050d09 100%);
+            border: 2px solid var(--gold-primary);
+            border-radius: 14px;
+            scroll-snap-align: center;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.85);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .rune-card-9x16:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.5);
+        }
+
+        .rune-card-9x16 img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            transition: transform 0.5s ease;
+        }
+
+        .rune-card-9x16:hover img {
+            transform: scale(1.05);
+        }
+
+        .rune-symbol-placeholder {
+            position: absolute;
+            top: 38%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 85px;
+            color: var(--gold-primary);
+            text-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .rune-card-overlay {
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(to top, rgba(3, 8, 6, 0.96) 0%, rgba(3, 8, 6, 0.75) 65%, transparent 100%);
+            padding: 35px 14px 16px;
+            text-align: center;
+        }
+
+        .rune-name {
+            font-family: var(--font-title);
+            color: var(--gold-primary);
+            font-size: 21px;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .rune-short {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin: 4px 0 0;
+        }
+
+        .delete-rune-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 10;
+            background: rgba(185, 28, 28, 0.85);
+            color: white;
+            border: 1px solid #f87171;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            display: none;
+        }
+
+        /* --- АДМІН-ПАНЕЛЬ ТА МОДАЛЬНІ ВІКНА --- */
+        #admin-panel {
+            display: none;
+            background: linear-gradient(135deg, #17140b 0%, #091913 100%);
+            border: 2px solid var(--gold-primary);
+            border-radius: 14px;
+            padding: 25px;
+            margin-bottom: 35px;
+            box-shadow: 0 0 35px rgba(212, 175, 55, 0.25);
+        }
+
+        .admin-box {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 10px;
+            padding: 18px;
+            margin-top: 18px;
+        }
+
+        .admin-controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .admin-controls input, .admin-controls textarea {
+            flex: 1;
+            min-width: 180px;
+            padding: 11px;
+            background: #040907;
+            border: 1px solid var(--gold-dark);
+            color: #fff;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: sans-serif;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(2, 6, 4, 0.92);
+            backdrop-filter: blur(6px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--bg-emerald);
+            border: 1px solid var(--gold-primary);
+            border-radius: 16px;
+            max-width: 600px; /* Збільшено ширину вікна для ПК */
+            width: 100%;
+            max-height: 95vh;
+            overflow-y: auto;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0,0,0,0.95);
+        }
+
+        #modalRuneImg {
+            width: auto;
+            max-width: 100%;
+            max-height: 70vh; /* Стандартний вигляд влізає в екран */
+            object-fit: contain;
+            border-radius: 10px;
+            border: 1px solid var(--gold-primary);
+            display: none;
+            margin: 0 auto 15px;
+            cursor: zoom-in; /* Лупа з плюсом */
+            transition: max-height 0.3s ease;
+        }
+
+        /* Збільшений (зумований) стан зображення */
+        #modalRuneImg.zoomed {
+            max-height: 200vh; /* Розтягується на оригінальний розмір, з'являється прокрутка */
+            cursor: zoom-out; /* Лупа з мінусом */
+        }
+
+        footer {
+            margin-top: 75px;
+            text-align: center;
+            border-top: 1px solid rgba(212, 175, 55, 0.25);
+            padding-top: 30px;
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .author-login-trigger {
+            margin-top: 25px;
+            font-size: 13px;
+            color: rgba(155, 168, 161, 0.45);
+            cursor: pointer;
+            background: none;
+            border: none;
+            text-decoration: underline;
+        }
+        .author-login-trigger:hover { color: var(--gold-primary); }
+    </style>
+</head>
+<body>
+
+<!-- Кутові орнаменти -->
+<svg class="corner-ornament corner-tl" viewBox="0 0 100 100" fill="none" stroke="#d4af37" stroke-width="1.5">
+    <path d="M5,95 L5,20 C5,10 10,5 20,5 L95,5"/>
+    <path d="M12,80 L12,25 C12,17 17,12 25,12 L80,12"/>
+    <rect x="18" y="18" width="16" height="16" transform="rotate(45 26 26)"/>
+    <circle cx="26" cy="26" r="4" fill="#d4af37"/>
+    <path d="M42,12 L52,22 L62,12 M12,42 L22,52 L12,62"/>
+</svg>
+<svg class="corner-ornament corner-tr" viewBox="0 0 100 100" fill="none" stroke="#d4af37" stroke-width="1.5">
+    <path d="M5,95 L5,20 C5,10 10,5 20,5 L95,5"/><path d="M12,80 L12,25 C12,17 17,12 25,12 L80,12"/>
+    <rect x="18" y="18" width="16" height="16" transform="rotate(45 26 26)"/><circle cx="26" cy="26" r="4" fill="#d4af37"/>
+</svg>
+<svg class="corner-ornament corner-bl" viewBox="0 0 100 100" fill="none" stroke="#d4af37" stroke-width="1.5">
+    <path d="M5,95 L5,20 C5,10 10,5 20,5 L95,5"/><path d="M12,80 L12,25 C12,17 17,12 25,12 L80,12"/>
+    <rect x="18" y="18" width="16" height="16" transform="rotate(45 26 26)"/><circle cx="26" cy="26" r="4" fill="#d4af37"/>
+</svg>
+<svg class="corner-ornament corner-br" viewBox="0 0 100 100" fill="none" stroke="#d4af37" stroke-width="1.5">
+    <path d="M5,95 L5,20 C5,10 10,5 20,5 L95,5"/><path d="M12,80 L12,25 C12,17 17,12 25,12 L80,12"/>
+    <rect x="18" y="18" width="16" height="16" transform="rotate(45 26 26)"/><circle cx="26" cy="26" r="4" fill="#d4af37"/>
+</svg>
+
+<svg class="bg-heraldic-center" viewBox="0 0 200 200" fill="none" stroke="#d4af37" stroke-width="1">
+    <circle cx="100" cy="100" r="90" stroke-dasharray="4 4"/>
+    <circle cx="100" cy="100" r="75"/>
+    <circle cx="100" cy="100" r="22"/>
+    <g stroke-width="1.2">
+        <line x1="100" y1="10" x2="100" y2="190"/>
+        <line x1="10" y1="100" x2="190" y2="100"/>
+        <line x1="36" y1="36" x2="164" y2="164"/>
+        <line x1="164" y1="36" x2="36" y2="164"/>
+        <path d="M90,30 L100,42 L110,30 M90,170 L100,158 L110,170"/>
+        <path d="M30,90 L42,100 L30,110 M170,90 L158,100 L170,110"/>
+    </g>
+    <polygon points="100,25 118,82 175,100 118,118 100,175 82,118 25,100 82,82" stroke-opacity="0.5"/>
+</svg>
+
+<div class="portal-wrapper">
+
+    <!-- ГОЛОВНИЙ ЗАГОЛОВОК -->
+    <header class="hero-header">
+        <svg class="ornament-svg" viewBox="0 0 500 34">
+            <path d="M10,17 L155,17 L175,6 L200,28 L225,6 L250,28 L275,6 L300,28 L325,6 L345,17 L490,17" stroke-width="1.5"/>
+            <polygon points="250,11 256,17 250,23 244,17" fill="#d4af37"/>
+            <circle cx="155" cy="17" r="3" fill="#d4af37"/>
+            <circle cx="345" cy="17" r="3" fill="#d4af37"/>
+        </svg>
+
+        <h1 class="main-title">Дзеркало Душі</h1>
+        <p class="sub-title">Простір глибинного самопізнання</p>
+
+        <svg class="ornament-svg" viewBox="0 0 500 34">
+            <path d="M40,17 L190,17 L215,28 L250,6 L285,28 L310,17 L460,17" stroke-width="1.5"/>
+            <circle cx="250" cy="17" r="4" fill="#10b981"/>
+        </svg>
+    </header>
+
+    <!-- ПЕРЕМИКАЧ РОЗДІЛІВ ПОРТАЛУ -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('tools', this)">✵ Інструменти та Практики</button>
+        <button class="tab-btn" onclick="switchTab('runes', this)">ᚠ Галерея Рун (9:16)</button>
+    </div>
+
+    <!-- ВКЛАДКА 1: ВІТРИНА ДОДАТКІВ -->
+    <div id="tab-tools">
+        <h2 class="section-heading">☾ Лабораторія Психіки та Сновидінь</h2>
+        <div id="psych-grid" class="projects-grid"></div>
+
+        <h2 class="section-heading">ᚠ Північна Традиція та Руни</h2>
+        <div id="nordic-grid" class="projects-grid"></div>
+    </div>
+
+    <!-- ВКЛАДКА 2: ГАЛЕРЕЯ РУН 9:16 -->
+    <div id="tab-runes" class="runes-gallery-wrapper">
+        <div style="text-align: center; max-width: 650px; margin: 0 auto 20px;">
+            <h2 style="font-family: var(--font-title); color: var(--gold-primary); margin-bottom: 5px;">Старший Футарк</h2>
+            <p style="color: var(--text-muted); margin-top: 0;">Гортайте колоду вбік та натисніть на карту, щоб розкрити її глибинний зміст</p>
+        </div>
+        <div id="runesCarousel" class="runes-carousel"></div>
+    </div>
+
+    <!-- АДМІН-ПАНЕЛЬ (Тепер надійно схована тут, перед підвалом) -->
+    <div id="admin-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h3 style="font-family: var(--font-title); color: var(--gold-primary); margin: 0; font-size: 24px;">
+                👑 Майстерня Хранителя (Адмін-панель)
+            </h3>
+            <div>
+                <button id="googleLoginBtn" class="btn-gold" style="padding: 6px 16px; font-size: 14px;">🔑 Авторизуватися через Google</button>
+                <button onclick="document.getElementById('admin-panel').style.display='none'" class="btn-gold" style="padding: 6px 14px; font-size: 14px; border-color: #888; color: #ccc;">Згорнути ✕</button>
+            </div>
+        </div>
+        <p id="adminAuthStatus" style="margin: 8px 0 0; font-size: 14px; color: var(--emerald-glow);">
+            Статус: Ви можете завантажувати нові карти Рун 9:16 та керувати доступами клієнтів.
+        </p>
+
+        <!-- БЛОК 1: ЗАВАНТАЖЕННЯ КАРТИНОК -->
+        <div class="admin-box">
+            <h4 style="margin: 0 0 10px; color: var(--gold-light); font-family: var(--font-title); font-size: 19px;">
+                🖼️ Завантажити нову карту в Галерею Рун (9:16)
+            </h4>
+            <div class="admin-controls">
+                <input type="text" id="newRuneName" placeholder="Назва (напр. Fehu — Феху)">
+                <input type="text" id="newRuneSymbol" placeholder="Символ (напр. ᚠ)" style="max-width: 140px;">
+                <input type="text" id="newRuneShort" placeholder="Коротке гасло на обкладинці">
+            </div>
+            <div class="admin-controls">
+                <textarea id="newRuneDesc" rows="2" placeholder="Повний опис руни, який відкриється при натисканні..."></textarea>
+            </div>
+            <div class="admin-controls" style="align-items: center;">
+                <label class="btn-gold" style="cursor: pointer; flex: 1;">
+                    📁 Обрати готове зображення (9:16) з пристрою
+                    <input type="file" id="runeImageFile" accept="image/*" style="display: none;" onchange="window.previewRuneFile(this)">
+                </label>
+                <span id="fileChosenText" style="font-size: 14px; color: var(--text-muted);">Файл не обрано</span>
+                <button class="btn-gold" style="background: var(--gold-primary); color: #000; font-weight: bold;" onclick="window.uploadAndSaveRune()">
+                    ✨ Додати карту на сайт
+                </button>
+            </div>
+            <p id="runeUploadMsg" style="margin: 8px 0 0; font-size: 14px; font-weight: bold;"></p>
+        </div>
+
+        <!-- БЛОК 2: КЕРУВАННЯ ЛІМІТАМИ СЛОВНИКА -->
+        <div class="admin-box">
+            <h4 style="margin: 0 0 10px; color: var(--gold-light); font-family: var(--font-title); font-size: 19px;">
+                🔑 Керування лімітами клієнтів (Firebase)
+            </h4>
+            <div class="admin-controls">
+                <input type="text" id="targetUserId" placeholder="Вставте ID клієнта (з Сонника)">
+                <input type="number" id="vipDays" placeholder="Днів безліміту (напр. 30)" style="max-width: 210px;">
+            </div>
+            <div class="admin-controls">
+                <button class="btn-gold" onclick="window.adminAddAttempts(1)">+1 Розбір</button>
+                <button class="btn-gold" onclick="window.adminAddAttempts(3)">+3 Розбори</button>
+                <button class="btn-gold" style="background: var(--gold-primary); color: #000;" onclick="window.adminGrantDays()">👑 Безліміт на дні</button>
+                <button class="btn-gold" style="border-color: #ef4444; color: #ef4444;" onclick="window.adminRevoke()">⛔ Обнулити</button>
+            </div>
+            <p id="adminMsg" style="margin: 8px 0 0; font-weight: bold; font-size: 14px;"></p>
+        </div>
+    </div>
+
+    <footer>
+        <p>✵ Простір Глибинного Самопізнання «Дзеркало Душі» ✵</p>
+        <a href="https://t.me/runes_valeriy" target="_blank" class="btn-gold" style="font-size: 15px; padding: 8px 22px;">
+            Зв'язатися з Автором / Особиста консультація
+        </a>
+        <br>
+        <button class="author-login-trigger" onclick="window.openAuthorPanel()">⚙️ Майстерня Автора (Керування сайтом)</button>
+    </footer>
+
+</div>
+
+<!-- Своє кастомне вікно для ПІН-коду (Браузер не пропонуватиме зберегти пароль!) -->
+<div id="pinModal" class="modal-overlay" onclick="this.style.display='none'">
+    <div class="modal-content" style="max-width: 320px; padding: 25px;" onclick="event.stopPropagation()">
+        <h3 style="color: var(--gold-primary); margin-top: 0; font-family: var(--font-title);">Доступ Автора</h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin-top: 0;">Введіть код майстерні</p>
+        <input type="tel" id="adminPinInput" autocomplete="off" data-lpignore="true" style="width: 100%; padding: 12px; background: #040907; border: 1px solid var(--gold-dark); color: #fff; border-radius: 8px; text-align: center; font-size: 20px; margin-bottom: 20px; letter-spacing: 2px;">
+        <button class="btn-gold" style="width: 100%;" onclick="window.checkPin()">Відкрити</button>
+    </div>
+</div>
+
+<!-- Модальне вікно перегляду Руни (з функцією збільшення) -->
+<div id="runeModal" class="modal-overlay" onclick="this.style.display='none'; document.getElementById('modalRuneImg').classList.remove('zoomed');">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <!-- Зображення тепер масштабується кліком -->
+        <img id="modalRuneImg" src="" alt="">
+        <div id="modalRuneSymbol" style="font-size: 52px; color: var(--gold-primary); margin-bottom: 5px;"></div>
+        <h3 id="modalRuneTitle" style="font-family: var(--font-title); color: var(--gold-primary); font-size: 26px; margin: 0 0 12px;"></h3>
+        <p id="modalRuneDesc" style="color: var(--text-main); font-size: 18px; line-height: 1.6; text-align: left;"></p>
+        <button class="btn-gold" style="margin-top: 15px;" onclick="document.getElementById('runeModal').style.display='none'; document.getElementById('modalRuneImg').classList.remove('zoomed');">Закрити</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    // ============================================================================
+    // 1. ВІТРИНА ДОДАТКІВ
+    // ============================================================================
+    const PORTAL_PROJECTS = [
+        {
+            id: "dreams",
+            category: "psych",
+            icon: "☾",
+            title: "Аналітика Снів",
+            description: "Глибинне юнгіанське тлумачення сновидінь, виявлення тіньових патернів та архетипів з можливістю збереження у PDF.",
+            url: "https://dreams-app-gold.vercel.app",
+            buttonText: "Увійти в Сонник ✵",
+            hidden: false
+        },
+        {
+            id: "archetypes",
+            category: "psych",
+            icon: "🎭",
+            title: "Діагностика Архетипів",
+            description: "Визначення провідних архетипів особистості та їхнього впливу на життєві сценарії й вибір.",
+            url: "#",
+            buttonText: "Пройти діагностику ✵",
+            hidden: false
+        },
+        {
+            id: "jung-backend",
+            category: "psych",
+            icon: "🕯️",
+            title: "Лабораторія Юнга (Саморозвиток)",
+            description: "Комплексна система інтеграції Тіні та роботи з індивідуацією.",
+            url: "#",
+            buttonText: "Відкрити простір",
+            hidden: true 
+        },
+        {
+            id: "vising",
+            category: "nordic",
+            icon: "🧭",
+            title: "Вісінг — Північний Орієнтир",
+            description: "Система глибинного самопізнання та життєвої навігації на основі древньої північної традиції.",
+            url: "#",
+            buttonText: "Перейти до Вісінгу ✵",
+            hidden: false
+        },
+        {
+            id: "yggdrasil",
+            category: "nordic",
+            icon: "🌳",
+            title: "Дерево Іггдрасіль",
+            description: "Інтерактивна подорож дев'ятьма світами світового дерева та міфологічними рівнями свідомості.",
+            url: "#",
+            buttonText: "Дослідити Іггдрасіль",
+            hidden: true 
+        }
+    ];
+
+    const DEFAULT_RUNES = [
+        { id: "def_1", symbol: "ᚠ", name: "Fehu (Феху)", short: "Первинний вогонь і ресурс", image: "", desc: "Енергія творення, матеріальний та духовний достаток, рух життєвої сили, яка вимагає мудрого управління." },
+        { id: "def_2", symbol: "ᚢ", name: "Uruz (Уруз)", short: "Первісна сила духу", image: "", desc: "Неприборканий потенціал, витривалість, зцілення та прорив крізь застарілі обмеження." },
+        { id: "def_3", symbol: "ᚦ", name: "Thurisaz (Турісаз)", short: "Брама та захисний шип", image: "", desc: "Сила спрямованої дії, захист кордонів, відсікання зайвого та усвідомлений поріг перед змінами." },
+        { id: "def_4", symbol: "ᚨ", name: "Ansuz (Ансуз)", short: "Дихання мудрості Одіна", image: "", desc: "Сакральне знання, сила слова, натхнення, знак згори та звільнення від внутрішніх ілюзій." }
+    ];
+
+    function renderProjects() {
+        const psychGrid = document.getElementById('psych-grid');
+        const nordicGrid = document.getElementById('nordic-grid');
+        psychGrid.innerHTML = '';
+        nordicGrid.innerHTML = '';
+
+        PORTAL_PROJECTS.filter(p => !p.hidden).forEach(proj => {
+            const cardHTML = `
+                <div class="project-card">
+                    <div>
+                        <div class="card-icon">${proj.icon}</div>
+                        <h3 class="card-title">${proj.title}</h3>
+                        <p class="card-desc">${proj.description}</p>
+                    </div>
+                    <a href="${proj.url}" class="btn-gold">${proj.buttonText}</a>
+                </div>
+            `;
+            if (proj.category === 'psych') psychGrid.innerHTML += cardHTML;
+            else nordicGrid.innerHTML += cardHTML;
+        });
+    }
+
+    window.switchTab = function(tabName, btnEl) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btnEl.classList.add('active');
+        document.getElementById('tab-tools').style.display = (tabName === 'tools') ? 'block' : 'none';
+        document.getElementById('tab-runes').style.display = (tabName === 'runes') ? 'block' : 'none';
+    };
+
+    renderProjects();
+
+    // ============================================================================
+    // 2. FIREBASE ТА АДМІНКА
+    // ============================================================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyAS_uZEKojn8bGZZ5SNKSM18HejuA9a5lQ",
+        authDomain: "dreams-app-base.firebaseapp.com",
+        projectId: "dreams-app-base",
+        storageBucket: "dreams-app-base.firebasestorage.app",
+        messagingSenderId: "578935795568",
+        appId: "1:578935795568:web:0c7301bdcbd246f8eb69b5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let isAdminMode = false;
+    let selectedImageBase64 = "";
+
+    // Безпечне вікно введення ПІН-коду (БЕЗ виклику браузерного збереження паролів)
+    window.openAuthorPanel = function() {
+        document.getElementById('pinModal').style.display = 'flex';
+        document.getElementById('adminPinInput').value = '';
+        document.getElementById('adminPinInput').focus();
+    };
+
+    window.checkPin = function() {
+        const pin = document.getElementById('adminPinInput').value;
+        if (pin === "7777") {
+            isAdminMode = true;
+            document.getElementById('pinModal').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'block';
+            document.querySelectorAll('.delete-rune-btn').forEach(btn => btn.style.display = 'block');
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        } else {
+            alert("Невірний код доступу.");
+        }
+    };
+
+    document.getElementById('googleLoginBtn').onclick = () => {
+        signInWithPopup(auth, new GoogleAuthProvider()).catch(err => {
+            alert("Помилка авторизації: " + err.message);
+        });
+    };
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Тільки пишемо статус, АЛЕ НЕ ВІДКРИВАЄМО адмінку автоматично
+            const statusEl = document.getElementById('adminAuthStatus');
+            if (statusEl) statusEl.innerHTML = `✅ Ви авторизовані як <b>${user.displayName}</b> (Ваш ID: <code>${user.uid}</code>)`;
+            const loginBtn = document.getElementById('googleLoginBtn');
+            if (loginBtn) loginBtn.style.display = 'none';
+        }
     });
 
-    const adminMessage = `📥 **НОВИЙ РЕЗУЛЬТАТ!**\n` +
-                         `👤 Клієнт: ${data.clientName || 'Не вказано'}\n` +
-                         `🔑 Архетип: ${archInfo.name} (${archKey})\n\n` +
-                         `🔐 **ШИФР:**\n<code>${data.code}</code>`;
-      
-    if ( ADMIN_ID ) {
-      await bot.telegram.sendMessage(ADMIN_ID, adminMessage, { parse_mode: 'HTML' });
+    window.previewRuneFile = function(input) {
+        const file = input.files[0];
+        if (!file) return;
+        document.getElementById('fileChosenText').innerText = "⏳ Обробка: " + file.name;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const maxW = 540; 
+                const scale = maxW / img.width;
+                canvas.width = maxW;
+                canvas.height = img.height * scale;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                selectedImageBase64 = canvas.toDataURL('image/jpeg', 0.82);
+                document.getElementById('fileChosenText').innerText = "✅ Готово: " + file.name;
+                document.getElementById('fileChosenText').style.color = "#10b981";
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    };
+
+    window.uploadAndSaveRune = async function() {
+        const name = document.getElementById('newRuneName').value.trim();
+        const desc = document.getElementById('newRuneDesc').value.trim();
+        const msg = document.getElementById('runeUploadMsg');
+
+        if (!selectedImageBase64) { 
+            msg.innerText = "❌ Спочатку оберіть файл зображення!"; 
+            msg.style.color = "#ef4444"; 
+            return; 
+        }
+
+        try {
+            msg.innerText = "⏳ Завантаження карти...";
+            msg.style.color = "#d4af37";
+            const runeId = "rune_" + Date.now();
+            await setDoc(doc(db, "runes_gallery", runeId), {
+                id: runeId,
+                name: name || "",
+                desc: desc || "",
+                image: selectedImageBase64,
+                createdAt: Date.now()
+            });
+
+            msg.innerText = "✅ Карту успішно додано!";
+            msg.style.color = "#10b981";
+            document.getElementById('newRuneName').value = '';
+            document.getElementById('newRuneDesc').value = '';
+            selectedImageBase64 = "";
+            document.getElementById('fileChosenText').innerText = "Файл не обрано";
+            await loadRunesFromFirebase();
+        } catch (e) {
+            msg.innerText = "❌ Помилка завантаження!";
+            msg.style.color = "#ef4444";
+        }
+    };
+
+    window.deleteRuneCard = async function(runeId, event) {
+        event.stopPropagation();
+        if (!confirm("Видалити цю карту з галереї?")) return;
+        try {
+            await deleteDoc(doc(db, "runes_gallery", runeId));
+            await loadRunesFromFirebase();
+        } catch (e) {
+            alert("Помилка видалення: " + e.message);
+        }
+    };
+
+    async function loadRunesFromFirebase() {
+        const carousel = document.getElementById('runesCarousel');
+        let customRunes = [];
+        try {
+            const snap = await getDocs(collection(db, "runes_gallery"));
+            snap.forEach(d => customRunes.push(d.data()));
+            customRunes.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+        } catch (e) {
+            console.warn(e);
+        }
+
+        const allRunes = customRunes.length > 0 ? customRunes : DEFAULT_RUNES;
+        carousel.innerHTML = '';
+
+        allRunes.forEach((rune) => {
+            const isCustom = rune.id && rune.id.startsWith("rune_");
+            const card = document.createElement('div');
+            card.className = 'rune-card-9x16';
+            card.innerHTML = `
+                ${isCustom ? `<button class="delete-rune-btn" style="display:${isAdminMode ? 'block' : 'none'}" onclick="window.deleteRuneCard('${rune.id}', event)">🗑️ Видалити</button>` : ''}
+                ${rune.image ? `<img src="${rune.image}" alt="Rune">` : `<div class="rune-symbol-placeholder">${rune.symbol || 'ᚠ'}</div>`}
+                ${rune.name ? `<div class="rune-card-overlay"><h4 class="rune-name">${rune.name}</h4></div>` : ''}
+            `;
+            card.onclick = () => {
+                const modalImg = document.getElementById('modalRuneImg');
+                if (rune.image) {
+                    modalImg.src = rune.image;
+                    modalImg.style.display = 'block';
+                    document.getElementById('modalRuneSymbol').style.display = 'none';
+                }
+                document.getElementById('modalRuneTitle').innerText = rune.name || '';
+                document.getElementById('modalRuneDesc').innerText = rune.desc || '';
+                document.getElementById('runeModal').style.display = 'flex';
+            };
+            carousel.appendChild(card);
+        });
     }
 
-  } catch (e) {
-    console.error('Помилка обробки Web App даних:', e);
-  }
-});
+    loadRunesFromFirebase();
 
-bot.launch();
-console.log('Бот успішно запущено!');
+    // ЛОГІКА ЗБІЛЬШЕННЯ КАРТИНКИ (ЛУПА)
+    const modalImgEl = document.getElementById('modalRuneImg');
+    if (modalImgEl) {
+        modalImgEl.onclick = function(e) {
+            e.stopPropagation(); // Запобігає закриттю модального вікна
+            this.classList.toggle('zoomed'); // Додає або забирає клас збільшення
+        };
+    }
 
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+    // ФУНКЦІЇ КЕРУВАННЯ ЛІМІТАМИ
+    window.adminAddAttempts = async function(amount) {
+        const uid = document.getElementById('targetUserId').value.trim();
+        const msg = document.getElementById('adminMsg');
+        if (!uid) { msg.innerText = "❌ Введіть ID клієнта!"; return; }
+        try {
+            const ref = doc(db, "users", uid);
+            const snap = await getDoc(ref);
+            let current = (snap.exists() && snap.data().dreamsLeft !== undefined) ? snap.data().dreamsLeft : 0;
+            await setDoc(ref, { dreamsLeft: current + amount, unlimitedAccess: false }, { merge: true });
+            msg.innerText = `✅ Нараховано +${amount}. Усього спроб у клієнта: ${current + amount}`;
+            msg.style.color = "#10b981";
+        } catch(e) { msg.innerText = "❌ Помилка запису в базу"; }
+    };
+
+    window.adminGrantDays = async function() {
+        const uid = document.getElementById('targetUserId').value.trim();
+        const days = parseInt(document.getElementById('vipDays').value.trim());
+        const msg = document.getElementById('adminMsg');
+        if (!uid || isNaN(days) || days <= 0) { msg.innerText = "❌ Введіть ID та кількість днів!"; return; }
+        try {
+            const until = Date.now() + (days * 86400000);
+            await setDoc(doc(db, "users", uid), { unlimitedUntil: until, unlimitedAccess: false }, { merge: true });
+            msg.innerText = `👑 Безліміт на ${days} дн. успішно активовано!`;
+            msg.style.color = "#d4af37";
+        } catch(e) { msg.innerText = "❌ Помилка бази"; }
+    };
+
+    window.adminRevoke = async function() {
+        const uid = document.getElementById('targetUserId').value.trim();
+        const msg = document.getElementById('adminMsg');
+        if (!uid) { msg.innerText = "❌ Введіть ID клієнта!"; return; }
+        try {
+            await setDoc(doc(db, "users", uid), { unlimitedAccess: false, unlimitedUntil: 0, dreamsLeft: 0 }, { merge: true });
+            msg.innerText = "⛔ Доступ клієнта повністю обнулено.";
+            msg.style.color = "#ef4444";
+        } catch(e) { msg.innerText = "❌ Помилка бази"; }
+    };
+</script>
+
+</body>
+</html>
