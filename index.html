@@ -40,17 +40,19 @@
             padding: 0;
             background-color: var(--bg-obsidian);
             background-image: 
-                /* 1. Густа віньєтка: залишає центр напівпрозорим, а краї дошки жорстко "заливає" темним фоном сайту */
-                radial-gradient(circle at 50% 50%, rgba(7, 25, 18, 0.3) 25%, var(--bg-obsidian) 55%),
-                /* 2. Твоє оригінальне зображення */
-                url('Фон.jpg');
-            /* Розмір 900px можна змінювати, щоб зробити візерунок більшим або меншим */
-            background-size: 100% 100%, 900px 900px;
+                /* Темний градієнт залишається на весь екран */
+                radial-gradient(circle at 50% 15%, rgba(3, 8, 6, 0.45) 0%, var(--bg-obsidian) 95%),
+                /* Твій новий патерн */
+                url('Фон.png');
+            
+            /* ПЕРШЕ значення (100% 100%) — для градієнта. 
+               ДРУГЕ значення (700px) — це фіксований розмір одного квадрата твого візерунка. */
+            background-size: 100% 100%, 700px;
+            
             background-position: center, center;
-            background-repeat: no-repeat, no-repeat;
+            /* Вмикаємо repeat для патерну, щоб він заповнював порожнечі на великих екранах */
+            background-repeat: no-repeat, repeat;
             background-attachment: fixed, fixed;
-            /* Режим luminosity прибирає коричневий колір дерева, адаптуючи лінії під смарагдово-золотий тон сайту */
-            background-blend-mode: normal, luminosity;
             
             color: var(--text-main);
             font-family: var(--font-body);
