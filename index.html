@@ -432,12 +432,6 @@
             transition: max-height 0.3s ease;
         }
 
-        /* Збільшений (зумований) стан зображення */
-        #modalRuneImg.zoomed {
-            max-height: 200vh; /* Розтягується на оригінальний розмір, з'являється прокрутка */
-            cursor: zoom-out; /* Лупа з мінусом */
-        }
-
         footer {
             margin-top: 75px;
             text-align: center;
@@ -622,15 +616,14 @@
     </div>
 </div>
 
-<!-- Модальне вікно перегляду Руни (з функцією збільшення) -->
-<div id="runeModal" class="modal-overlay" onclick="this.style.display='none'; document.getElementById('modalRuneImg').classList.remove('zoomed');">
+<!-- Модальне вікно перегляду Руни -->
+<div id="runeModal" class="modal-overlay" onclick="this.style.display='none'; if(window.resetZoom) window.resetZoom();">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <!-- Зображення тепер масштабується кліком -->
         <img id="modalRuneImg" src="" alt="">
         <div id="modalRuneSymbol" style="font-size: 52px; color: var(--gold-primary); margin-bottom: 5px;"></div>
         <h3 id="modalRuneTitle" style="font-family: var(--font-title); color: var(--gold-primary); font-size: 26px; margin: 0 0 12px;"></h3>
         <p id="modalRuneDesc" style="color: var(--text-main); font-size: 18px; line-height: 1.6; text-align: left;"></p>
-        <button class="btn-gold" style="margin-top: 15px;" onclick="document.getElementById('runeModal').style.display='none'; document.getElementById('modalRuneImg').classList.remove('zoomed');">Закрити</button>
+        <button class="btn-gold" style="margin-top: 15px;" onclick="document.getElementById('runeModal').style.display='none'; if(window.resetZoom) window.resetZoom();">Закрити</button>
     </div>
 </div>
 
@@ -900,12 +893,86 @@
 
     loadRunesFromFirebase();
 
-    // ЛОГІКА ЗБІЛЬШЕННЯ КАРТИНКИ (ЛУПА)
+    // ============================================================================
+    // ЛОГІКА ЗБІЛЬШЕННЯ КАРТИНКИ (ПЛАВНЕ КОЛІЩАТКО + ПЕРЕТЯГУВАННЯ МИШКОЮ)
+    // ============================================================================
     const modalImgEl = document.getElementById('modalRuneImg');
+    let currentZoom = 1;
+    let isDragging = false;
+    let startX, startY, translateX = 0, translateY = 0;
+
+    // Функція скидання масштабу при закритті вікна
+    window.resetZoom = function() {
+        currentZoom = 1;
+        translateX = 0;
+        translateY = 0;
+        if (modalImgEl) {
+            modalImgEl.style.transform = `translate(0px, 0px) scale(1)`;
+            modalImgEl.style.cursor = 'zoom-in';
+        }
+    };
+
     if (modalImgEl) {
+        modalImgEl.style.transition = 'transform 0.15s ease-out';
+
+        // 1. Плавне збільшення/зменшення коліщатком миші
+        modalImgEl.addEventListener('wheel', function(e) {
+            e.preventDefault(); 
+            e.stopPropagation();
+            
+            const zoomStep = 0.2; // Наскільки сильно наближає за 1 прокрут
+            if (e.deltaY < 0) currentZoom += zoomStep; // Вгору - наближаємо
+            else currentZoom -= zoomStep; // Вниз - віддаляємо
+            
+            // Межі збільшення (від 1 до 5 разів)
+            currentZoom = Math.min(Math.max(1, currentZoom), 5);
+            
+            if (currentZoom === 1) {
+                translateX = 0; translateY = 0; // Повертаємо в центр, якщо масштаб 100%
+            }
+            
+            this.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentZoom})`;
+            this.style.cursor = currentZoom > 1 ? 'grab' : 'zoom-in';
+        }, { passive: false });
+
+        // 2. Затискання мишки для перетягування картинки (якщо вона збільшена)
+        modalImgEl.addEventListener('mousedown', function(e) {
+            if (currentZoom > 1) {
+                isDragging = true;
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+                this.style.cursor = 'grabbing';
+                this.style.transition = 'none'; // Вимикаємо плавність, щоб картинка не "пливла" за мишкою із затримкою
+            }
+        });
+
+        // 3. Рух мишкою
+        window.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            modalImgEl.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentZoom})`;
+        });
+
+        // 4. Відпускання мишки
+        window.addEventListener('mouseup', function() {
+            if (isDragging) {
+                isDragging = false;
+                modalImgEl.style.cursor = 'grab';
+                modalImgEl.style.transition = 'transform 0.15s ease-out'; // Повертаємо плавність для коліщатка
+            }
+        });
+
+        // 5. Клік по картинці (швидке наближення x2.5 або скидання)
         modalImgEl.onclick = function(e) {
-            e.stopPropagation(); // Запобігає закриттю модального вікна
-            this.classList.toggle('zoomed'); // Додає або забирає клас збільшення
+            e.stopPropagation();
+            if (currentZoom > 1) {
+                window.resetZoom();
+            } else {
+                currentZoom = 2.5; 
+                this.style.transform = `translate(0px, 0px) scale(${currentZoom})`;
+                this.style.cursor = 'grab';
+            }
         };
     }
 
