@@ -38,21 +38,23 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: var(--bg-obsidian);
+            /* Основний глибокий, спокійний темний колір */
+            background-color: #030806; 
             background-image: 
-                /* 1. Твоя картинка вівтаря (буде зверху) */
-                url('image_10.jpg'),
-                /* 2. Повертаємо той самий красивий зелений фон на весь екран (буде під картинкою) */
-                radial-gradient(circle at 50% 30%, rgba(16, 62, 45, 0.75) 0%, rgba(7, 25, 18, 0.9) 60%, var(--bg-obsidian) 100%);
+                /* 1. Делікатний темний градієнт: плавно занурює центр у темряву, залишаючи краї абсолютно природними */
+                radial-gradient(circle at 50% 30%, rgba(3, 8, 6, 0.5) 0%, #030806 80%),
+                /* 2. Нове, виправлене зображення вівтаря */
+                url('image_10.jpg');
             
-            /* Картинка - 950px по центру, зелений фон - 100% розтягнутий на весь екран */
-            background-size: min(950px, 100%) auto, 100% 100%;
+            /* Динамічний розмір: максимум 900px для ноутбуків, щоб все поміщалося, і 100% для смартфонів */
+            background-size: 100% 100%, min(900px, 100%) auto;
+            
             background-position: center, center;
-            background-repeat: no-repeat, no-repeat;
-            background-attachment: fixed, fixed;
             
-            /* МАГІЯ: Цей рядок прибирає жорсткі темні краї картинки і "вплавляє" її в зелений фон */
-            background-blend-mode: screen, normal;
+            /* Жорстко забороняємо будь-яке повторення картинки по боках */
+            background-repeat: no-repeat, no-repeat;
+            
+            background-attachment: fixed, fixed;
             
             color: var(--text-main);
             font-family: var(--font-body);
