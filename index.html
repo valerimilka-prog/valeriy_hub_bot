@@ -40,15 +40,19 @@
             padding: 0;
             background-color: var(--bg-obsidian);
             background-image: 
-                radial-gradient(circle at 50% 15%, rgba(3, 8, 6, 0.45) 0%, var(--bg-obsidian) 95%),
-                url('image_10.jpg');
+                /* 1. Твоя картинка вівтаря (буде зверху) */
+                url('image_10.jpg'),
+                /* 2. Повертаємо той самий красивий зелений фон на весь екран (буде під картинкою) */
+                radial-gradient(circle at 50% 30%, rgba(16, 62, 45, 0.75) 0%, rgba(7, 25, 18, 0.9) 60%, var(--bg-obsidian) 100%);
             
-            /* Динамічний розмір: максимум 950px для ПК, але не більше 100% ширини екрана для телефону */
-            background-size: 100% 100%, min(900px, 100%); 
-            
+            /* Картинка - 950px по центру, зелений фон - 100% розтягнутий на весь екран */
+            background-size: min(950px, 100%) auto, 100% 100%;
             background-position: center, center;
             background-repeat: no-repeat, no-repeat;
             background-attachment: fixed, fixed;
+            
+            /* МАГІЯ: Цей рядок прибирає жорсткі темні краї картинки і "вплавляє" її в зелений фон */
+            background-blend-mode: screen, normal;
             
             color: var(--text-main);
             font-family: var(--font-body);
