@@ -36,18 +36,27 @@
         * { box-sizing: border-box; }
 
         body {
-            /* ... інші налаштування ... */
+            margin: 0;
+            padding: 0;
+            background-color: #061811;
             background-image: 
-                radial-gradient(circle at 50% 15%, rgba(3, 8, 6, 0.45) 0%, var(--bg-obsidian) 95%),
+                /* Легке рівномірне притемнення 25% для контрасту карток, без чорних країв */
+                linear-gradient(rgba(4, 15, 10, 0.25), rgba(4, 15, 10, 0.25)),
                 url('image_10.jpg');
             
-            /* Зменшуємо розмір вівтаря, щоб він помістився на екрані */
-            background-size: 100% 100%, 950px; 
+            /* cover розтягує широку картинку 16:9 на весь екран без жодних обрізаних боків */
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             
-            background-position: center, center;
-            background-repeat: no-repeat, no-repeat;
-            background-attachment: fixed, fixed;
-            /* ... */
+            color: var(--text-main);
+            font-family: var(--font-body);
+            font-size: 18px;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
         }
         .bg-heraldic-center {
             position: fixed;
