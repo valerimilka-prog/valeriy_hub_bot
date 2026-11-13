@@ -40,20 +40,14 @@
             padding: 0;
             background-color: var(--bg-obsidian);
             background-image: 
-                /* 1. Градієнт-затемнення на весь екран */
                 radial-gradient(circle at 50% 15%, rgba(3, 8, 6, 0.45) 0%, var(--bg-obsidian) 95%),
-                /* 2. Твоє зображення вівтаря */
                 url('image_10.jpg');
             
-            /* Тут ми змінили 700px на 1100px. Якщо захочеш ще більший — постав 1200px або 1300px */
-            background-size: 100% 100%, 900px;
+            /* Динамічний розмір: максимум 950px для ПК, але не більше 100% ширини екрана для телефону */
+            background-size: 100% 100%, min(950px, 100%); 
             
-            /* Обидва фони ставимо по центру */
             background-position: center, center;
-            
-            /* КЛЮЧОВЕ: no-repeat для обох фонів! Ніякого дублювання по боках */
             background-repeat: no-repeat, no-repeat;
-            
             background-attachment: fixed, fixed;
             
             color: var(--text-main);
