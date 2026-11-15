@@ -60,21 +60,23 @@
 
         @media (max-width: 768px) {
             body {
-                background-image: url('image_10_mobile.jpg') !important;
-                background-size: cover !important;
-                background-position: center center !important;
-                background-attachment: scroll !important; /* Уникаємо мобільних глюків з фіксацією */
+                background-image: none !important;
             }
-        }
 
-        @media (max-width: 768px) {
             body::before {
-                /* На телефоні: підвантажуємо вертикальну картинку 9:16.
-                   Перший шар (100% auto) гарантує, що все коло та написи стихій повністю поміщаються по ширині екрана,
-                   другий шар (cover) безшовно закриває весь вертикальний простір зверху і знизу */
-                background-image: url('image_10_mobile.jpg'), url('image_10_mobile.jpg');
-                background-position: center center, center center;
-                background-size: 100% auto, cover;
+                content: "";
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                z-index: -1;
+                background-color: var(--bg-emerald);
+                background-image: url('image_10_mobile.jpg');
+                background-size: 100% auto;
+                background-position: center center;
+                background-repeat: no-repeat;
+                pointer-events: none;
             }
         }
 
