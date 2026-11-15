@@ -20,7 +20,7 @@
 
         :root {
             --bg-obsidian: #030806;
-            --bg-emerald: #071912;
+            --bg-emerald: #061811;
             --card-emerald: rgba(9, 28, 20, 0.88);
             --gold-primary: #d4af37;
             --gold-dim: rgba(212, 175, 55, 0.22);
@@ -38,8 +38,7 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #04120c !important; /* Глибокий смарагдовий колір основи */
-            background-image: none !important;    /* Прибираємо картинку з body, щоб вона не глючила на мобільному */
+            background-color: var(--bg-emerald);
             color: var(--text-main);
             font-family: var(--font-body);
             font-size: 18px;
@@ -49,20 +48,90 @@
             position: relative;
         }
 
-        /* ІЗОЛЬОВАНИЙ ФОНОВИЙ ВІВТАР (Працює ідеально і на ПК, і в Telegram) */
+        /* ==========================================================================
+           ФОНОВИЙ ВІВТАР: ПК (image_10.jpg) та СМАРТФОН (image_10_mobile.jpg)
+           ========================================================================== */
         body::before {
             content: "";
             position: fixed;
             inset: 0;
             z-index: -1;
-            background-color: #04120c;
-            background-image: radial-gradient(circle at center, rgba(4, 18, 12, 0.2) 0%, rgba(2, 8, 5, 0.65) 100%), url('image_10.jpg');
-            background-repeat: no-repeat;
-            background-position: center center;
-            /* На ПК прив'язуємо до ВИСОТИ екрана (98%), щоб верхні і нижні руни НІКОЛИ не обрізалися */
-            background-size: auto 98vh; 
+            background-color: var(--bg-emerald);
+            /* На ПК: верхній шар (contain) гарантує, що все коло з рунами 100% влізає по висоті і ширині без обрізань,
+               а нижній шар (cover) заповнює зелений космічний фон по краях широкого монітора */
+            background-image: url('image_10.jpg'), url('image_10.jpg');
+            background-repeat: no-repeat, no-repeat;
+            background-position: center center, center center;
+            background-size: contain, cover;
             pointer-events: none;
         }
+
+        @media (max-width: 768px) {
+            body::before {
+                /* На телефоні: підвантажуємо вертикальну картинку 9:16.
+                   Перший шар (100% auto) гарантує, що все коло та написи стихій повністю поміщаються по ширині екрана,
+                   другий шар (cover) безшовно закриває весь вертикальний простір зверху і знизу */
+                background-image: url('image_10_mobile.jpg'), url('image_10_mobile.jpg');
+                background-position: center center, center center;
+                background-size: 100% auto, cover;
+            }
+        }
+
+        /* ==========================================================================
+           БАНЕР-ПІДКАЗКА ДЛЯ ВБУДОВАНОГО БРАУЗЕРА TIKTOK / INSTAGRAM
+           ========================================================================== */
+        #inapp-browser-banner {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 3000;
+            background: linear-gradient(135deg, rgba(16, 48, 35, 0.97) 0%, rgba(6, 20, 14, 0.98) 100%);
+            border-bottom: 1.5px solid var(--gold-primary);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.85);
+            padding: 12px 16px;
+            color: var(--text-main);
+            font-size: 15px;
+            line-height: 1.45;
+            backdrop-filter: blur(8px);
+        }
+
+        .inapp-banner-inner {
+            max-width: 960px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .inapp-banner-text {
+            flex: 1;
+        }
+
+        .inapp-banner-text strong {
+            color: var(--gold-primary);
+            font-family: var(--font-title);
+            letter-spacing: 0.5px;
+        }
+
+        .inapp-banner-close {
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid var(--gold-primary);
+            color: var(--gold-light);
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* ==========================================================================
+           ДЕКОРАТИВНІ ЕЛЕМЕНТИ ТА КОНТЕЙНЕР
+           ========================================================================== */
         .bg-heraldic-center {
             position: fixed;
             top: 50%;
@@ -71,7 +140,7 @@
             width: 75vw;
             max-width: 700px;
             height: auto;
-            opacity: 0.05;
+            opacity: 0.04;
             pointer-events: none;
             z-index: 0;
         }
@@ -128,7 +197,7 @@
             padding: 20px 10px;
             border-top: 1px solid var(--gold-dim);
             border-bottom: 1px solid var(--gold-dim);
-            background: radial-gradient(circle, rgba(9, 29, 21, 0.75) 0%, transparent 80%);
+            background: radial-gradient(circle, rgba(9, 29, 21, 0.72) 0%, transparent 80%);
         }
 
         .ornament-svg {
@@ -169,7 +238,7 @@
         }
 
         .tab-btn {
-            background: rgba(9, 26, 19, 0.8);
+            background: rgba(9, 26, 19, 0.82);
             color: var(--text-muted);
             border: 1px solid rgba(212, 175, 55, 0.35);
             padding: 12px 28px;
@@ -256,6 +325,9 @@
             flex-grow: 1;
         }
 
+        /* ==========================================================================
+           ГАЛЕРЕЯ РУН 9:16
+           ========================================================================== */
         .runes-gallery-wrapper {
             display: none;
             animation: fadeIn 0.4s ease;
@@ -365,7 +437,9 @@
             display: none;
         }
 
-        /* --- АДМІН-ПАНЕЛЬ ТА МОДАЛЬНІ ВІКНА --- */
+        /* ==========================================================================
+           АДМІН-ПАНЕЛЬ ТА МОДАЛЬНІ ВІКНА (БЕЗ КОНФЛІКТІВ)
+           ========================================================================== */
         #admin-panel {
             display: none;
             background: linear-gradient(135deg, #17140b 0%, #091913 100%);
@@ -415,17 +489,29 @@
             padding: 20px;
         }
 
-        /* 1. Робимо контейнер-коробку повністю НЕВИДИМИМ (без зеленого фону і рамок) */
-        .modal-content {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            padding: 0 !important;
-            margin: 0 auto !important;
-            width: auto !important;
-            max-width: 98vw !important;
-            max-height: 98vh !important;
-            overflow: visible !important;
+        /* Окремий стиль для вікна ПІН-коду Автора */
+        .pin-modal-box {
+            background: var(--bg-emerald);
+            border: 1px solid var(--gold-primary);
+            border-radius: 16px;
+            max-width: 320px;
+            width: 90%;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.95);
+        }
+
+        /* Повноекранний чистий лайтбокс для картки Руни */
+        #runeModal .modal-content {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            margin: 0 auto;
+            width: auto;
+            max-width: 98vw;
+            max-height: 98vh;
+            overflow: visible;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -433,81 +519,47 @@
             position: relative;
         }
 
-        /* 2. Сама картинка руни: чиста, по центру, максимального масштабу */
         #modalRuneImg {
-            width: auto !important;
-            height: auto !important;
-            max-width: 95vw !important;
-            max-height: 90vh !important; /* 90% висоти екрана на ПК без жодних скролів */
+            width: auto;
+            height: auto;
+            max-width: 95vw;
+            max-height: 90vh;
             object-fit: contain;
             border-radius: 12px;
             border: 1px solid var(--gold-primary);
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.95); /* Глибока тінь під самою картою */
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.95);
             display: none;
-            margin: 0 !important;
+            margin: 0;
             cursor: zoom-in;
         }
 
-        /* 3. Напівпрозора кнопка "Закрити", яка плаває внизу ПОВЕРХ картки (без полички!) */
-        .modal-content button,
-        .modal-content .btn {
-            position: fixed !important;
-            bottom: 22px !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            background: rgba(4, 15, 10, 0.78) !important; /* Напівпрозорий темний смарагд */
-            backdrop-filter: blur(8px); /* Матове скло */
+        #runeModal .close-rune-btn {
+            position: fixed;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(4, 15, 10, 0.78);
+            backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(212, 175, 55, 0.65) !important;
-            color: var(--gold-light, #f3e5ab) !important;
-            padding: 8px 30px !important;
-            border-radius: 30px !important;
-            z-index: 10002 !important;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.85) !important;
-            margin: 0 !important;
+            border: 1px solid rgba(212, 175, 55, 0.65);
+            color: var(--gold-light);
+            padding: 8px 30px;
+            border-radius: 30px;
+            z-index: 10002;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.85);
+            margin: 0;
         }
 
         @media (max-width: 768px) {
-            body {
-                /* 1. Накладаємо градієнт ПОВЕРХ картинки, який плавно стирає її межу на висоті 38vh */
-                background-image: 
-                    linear-gradient(to bottom, rgba(6, 24, 17, 0) 15vh, #061811 38vh), 
-                    url('image_10.jpg') !important;
-                
-                /* 2. Розміри: перший для градієнта (на всю сторінку), другий для картинки (140% ширини, щоб руни були крупними) */
-                background-size: 100% 100%, 140% auto !important; 
-                
-                /* 3. Позиції: градієнт зверху, картинку опускаємо на 10px */
-                background-position: left top, center 10px !important;
-                
-                background-repeat: no-repeat !important;
-                background-color: #061811 !important;
-                background-attachment: scroll !important;
-            }
-
-            /* Повноекранні руни залишаються без змін */
             #modalRuneImg {
-                max-width: 98vw !important;
-                max-height: 94vh !important;
+                max-width: 98vw;
+                max-height: 94vh;
             }
-            .modal-content button,
-            .modal-content .btn {
-                bottom: 16px !important;
-                padding: 7px 26px !important;
-                font-size: 14px !important;
+            #runeModal .close-rune-btn {
+                bottom: 16px;
+                padding: 7px 26px;
+                font-size: 14px;
             }
-        }
-        #modalRuneImg {
-            width: auto;
-            max-width: 100%;
-            max-height: 90vh; /* Стандартний вигляд влізає в екран */
-            object-fit: contain;
-            border-radius: 10px;
-            border: 1px solid var(--gold-primary);
-            display: none;
-            margin: 0 auto 15px;
-            cursor: zoom-in; /* Лупа з плюсом */
-            transition: max-height 0.3s ease;
         }
 
         footer {
@@ -532,6 +584,16 @@
     </style>
 </head>
 <body>
+
+<!-- Автоматичний банер-підказка для користувачів, які перейшли з TikTok або Instagram -->
+<div id="inapp-browser-banner">
+    <div class="inapp-banner-inner">
+        <div class="inapp-banner-text">
+            <strong>✵ Порада для коректної роботи:</strong> Ви відкрили простір через внутрішній переглядач соцмережі. Для збереження PDF-файлів та повної функціональності усіх інструментів натисніть <strong>•••</strong> (три крапки вгорі) та оберіть <strong>«Відкрити в браузері»</strong> ↗
+        </div>
+        <button class="inapp-banner-close" onclick="document.getElementById('inapp-browser-banner').style.display='none'" title="Закрити">✕</button>
+    </div>
+</div>
 
 <!-- Кутові орнаменти -->
 <svg class="corner-ornament corner-tl" viewBox="0 0 100 100" fill="none" stroke="#d4af37" stroke-width="1.5">
@@ -591,8 +653,8 @@
 
     <!-- ПЕРЕМИКАЧ РОЗДІЛІВ ПОРТАЛУ -->
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('tools', this)">✵ Інструменти та Практики</button>
-        <button class="tab-btn" onclick="switchTab('runes', this)">ᚠ Галерея Рун (9:16)</button>
+        <button id="tabBtnTools" class="tab-btn active" onclick="switchTab('tools', this)">✵ Інструменти та Практики</button>
+        <button id="tabBtnRunes" class="tab-btn" onclick="switchTab('runes', this)">ᚠ Галерея Рун (9:16)</button>
     </div>
 
     <!-- ВКЛАДКА 1: ВІТРИНА ДОДАТКІВ -->
@@ -600,8 +662,12 @@
         <h2 class="section-heading">☾ Лабораторія Психіки та Сновидінь</h2>
         <div id="psych-grid" class="projects-grid"></div>
 
+        <!-- РОЗДІЛ "ПІВНІЧНА ТРАДИЦІЯ ТА РУНИ" (Закоментовано на перспективу для Іггдрасіля та нових проєктів.
+             Щоб увімкнути — просто видали стрілочки коментарів зверху і знизу цього блоку) -->
+        <!--
         <h2 class="section-heading">ᚠ Північна Традиція та Руни</h2>
         <div id="nordic-grid" class="projects-grid"></div>
+        -->
     </div>
 
     <!-- ВКЛАДКА 2: ГАЛЕРЕЯ РУН 9:16 -->
@@ -613,7 +679,7 @@
         <div id="runesCarousel" class="runes-carousel"></div>
     </div>
 
-    <!-- АДМІН-ПАНЕЛЬ (Тепер надійно схована тут, перед підвалом) -->
+    <!-- АДМІН-ПАНЕЛЬ -->
     <div id="admin-panel">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <h3 style="font-family: var(--font-title); color: var(--gold-primary); margin: 0; font-size: 24px;">
@@ -684,9 +750,9 @@
 
 </div>
 
-<!-- Своє кастомне вікно для ПІН-коду (Браузер не пропонуватиме зберегти пароль!) -->
+<!-- Вікно для ПІН-коду Автора -->
 <div id="pinModal" class="modal-overlay" onclick="this.style.display='none'">
-    <div class="modal-content" style="max-width: 320px; padding: 25px;" onclick="event.stopPropagation()">
+    <div class="pin-modal-box" onclick="event.stopPropagation()">
         <h3 style="color: var(--gold-primary); margin-top: 0; font-family: var(--font-title);">Доступ Автора</h3>
         <p style="color: var(--text-muted); font-size: 14px; margin-top: 0;">Введіть код майстерні</p>
         <input type="tel" id="adminPinInput" autocomplete="off" data-lpignore="true" style="width: 100%; padding: 12px; background: #040907; border: 1px solid var(--gold-dark); color: #fff; border-radius: 8px; text-align: center; font-size: 20px; margin-bottom: 20px; letter-spacing: 2px;">
@@ -694,14 +760,14 @@
     </div>
 </div>
 
-<!-- Модальне вікно перегляду Руни -->
+<!-- Модальне вікно перегляду Руни (Повноекранний лайтбокс) -->
 <div id="runeModal" class="modal-overlay" onclick="this.style.display='none'; if(window.resetZoom) window.resetZoom();">
     <div class="modal-content" onclick="event.stopPropagation()">
         <img id="modalRuneImg" src="" alt="">
         <div id="modalRuneSymbol" style="font-size: 52px; color: var(--gold-primary); margin-bottom: 5px;"></div>
         <h3 id="modalRuneTitle" style="font-family: var(--font-title); color: var(--gold-primary); font-size: 26px; margin: 0 0 12px;"></h3>
         <p id="modalRuneDesc" style="color: var(--text-main); font-size: 18px; line-height: 1.6; text-align: left;"></p>
-        <button class="btn-gold" style="margin-top: 15px;" onclick="document.getElementById('runeModal').style.display='none'; if(window.resetZoom) window.resetZoom();">Закрити</button>
+        <button class="btn-gold close-rune-btn" onclick="document.getElementById('runeModal').style.display='none'; if(window.resetZoom) window.resetZoom();">Закрити</button>
     </div>
 </div>
 
@@ -709,6 +775,18 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    // ============================================================================
+    // 0. АВТОМАТИЧНЕ ВИЗНАЧЕННЯ TIKTOK / INSTAGRAM WEBVIEW БРАУЗЕРА
+    // ============================================================================
+    (function detectInAppBrowser() {
+        const ua = navigator.userAgent || navigator.vendor || window.opera || "";
+        const isInApp = /BytedanceWebview|TikTok|musical_ly|Instagram|FBAN|FBAV/i.test(ua);
+        if (isInApp) {
+            const banner = document.getElementById('inapp-browser-banner');
+            if (banner) banner.style.display = 'block';
+        }
+    })();
 
     // ============================================================================
     // 1. ВІТРИНА ДОДАТКІВ
@@ -776,8 +854,8 @@
     function renderProjects() {
         const psychGrid = document.getElementById('psych-grid');
         const nordicGrid = document.getElementById('nordic-grid');
-        psychGrid.innerHTML = '';
-        nordicGrid.innerHTML = '';
+        if (psychGrid) psychGrid.innerHTML = '';
+        if (nordicGrid) nordicGrid.innerHTML = '';
 
         PORTAL_PROJECTS.filter(p => !p.hidden).forEach(proj => {
             const cardHTML = `
@@ -790,14 +868,17 @@
                     <a href="${proj.url}" class="btn-gold">${proj.buttonText}</a>
                 </div>
             `;
-            if (proj.category === 'psych') psychGrid.innerHTML += cardHTML;
-            else nordicGrid.innerHTML += cardHTML;
+            if (proj.category === 'psych' && psychGrid) {
+                psychGrid.innerHTML += cardHTML;
+            } else if (proj.category === 'nordic' && nordicGrid) {
+                nordicGrid.innerHTML += cardHTML;
+            }
         });
     }
 
     window.switchTab = function(tabName, btnEl) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btnEl.classList.add('active');
+        if (btnEl) btnEl.classList.add('active');
         document.getElementById('tab-tools').style.display = (tabName === 'tools') ? 'block' : 'none';
         document.getElementById('tab-runes').style.display = (tabName === 'runes') ? 'block' : 'none';
     };
@@ -823,7 +904,6 @@
     let isAdminMode = false;
     let selectedImageBase64 = "";
 
-    // Безпечне вікно введення ПІН-коду (БЕЗ виклику браузерного збереження паролів)
     window.openAuthorPanel = function() {
         document.getElementById('pinModal').style.display = 'flex';
         document.getElementById('adminPinInput').value = '';
@@ -851,7 +931,6 @@
 
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            // Тільки пишемо статус, АЛЕ НЕ ВІДКРИВАЄМО адмінку автоматично
             const statusEl = document.getElementById('adminAuthStatus');
             if (statusEl) statusEl.innerHTML = `✅ Ви авторизовані як <b>${user.displayName}</b> (Ваш ID: <code>${user.uid}</code>)`;
             const loginBtn = document.getElementById('googleLoginBtn');
@@ -972,14 +1051,13 @@
     loadRunesFromFirebase();
 
     // ============================================================================
-    // ЛОГІКА ЗБІЛЬШЕННЯ КАРТИНКИ (ПЛАВНЕ КОЛІЩАТКО + ПЕРЕТЯГУВАННЯ МИШКОЮ)
+    // 3. ЛОГІКА ЗБІЛЬШЕННЯ КАРТИНКИ РУНИ (КОЛІЩАТКО + ПЕРЕТЯГУВАННЯ)
     // ============================================================================
     const modalImgEl = document.getElementById('modalRuneImg');
     let currentZoom = 1;
     let isDragging = false;
     let startX, startY, translateX = 0, translateY = 0;
 
-    // Функція скидання масштабу при закритті вікна
     window.resetZoom = function() {
         currentZoom = 1;
         translateX = 0;
@@ -993,38 +1071,34 @@
     if (modalImgEl) {
         modalImgEl.style.transition = 'transform 0.15s ease-out';
 
-        // 1. Плавне збільшення/зменшення коліщатком миші
         modalImgEl.addEventListener('wheel', function(e) {
             e.preventDefault(); 
             e.stopPropagation();
             
-            const zoomStep = 0.2; // Наскільки сильно наближає за 1 прокрут
-            if (e.deltaY < 0) currentZoom += zoomStep; // Вгору - наближаємо
-            else currentZoom -= zoomStep; // Вниз - віддаляємо
+            const zoomStep = 0.2;
+            if (e.deltaY < 0) currentZoom += zoomStep;
+            else currentZoom -= zoomStep;
             
-            // Межі збільшення (від 1 до 5 разів)
             currentZoom = Math.min(Math.max(1, currentZoom), 5);
             
             if (currentZoom === 1) {
-                translateX = 0; translateY = 0; // Повертаємо в центр, якщо масштаб 100%
+                translateX = 0; translateY = 0;
             }
             
             this.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentZoom})`;
             this.style.cursor = currentZoom > 1 ? 'grab' : 'zoom-in';
         }, { passive: false });
 
-        // 2. Затискання мишки для перетягування картинки (якщо вона збільшена)
         modalImgEl.addEventListener('mousedown', function(e) {
             if (currentZoom > 1) {
                 isDragging = true;
                 startX = e.clientX - translateX;
                 startY = e.clientY - translateY;
                 this.style.cursor = 'grabbing';
-                this.style.transition = 'none'; // Вимикаємо плавність, щоб картинка не "пливла" за мишкою із затримкою
+                this.style.transition = 'none';
             }
         });
 
-        // 3. Рух мишкою
         window.addEventListener('mousemove', function(e) {
             if (!isDragging) return;
             translateX = e.clientX - startX;
@@ -1032,16 +1106,14 @@
             modalImgEl.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentZoom})`;
         });
 
-        // 4. Відпускання мишки
         window.addEventListener('mouseup', function() {
             if (isDragging) {
                 isDragging = false;
                 modalImgEl.style.cursor = 'grab';
-                modalImgEl.style.transition = 'transform 0.15s ease-out'; // Повертаємо плавність для коліщатка
+                modalImgEl.style.transition = 'transform 0.15s ease-out';
             }
         });
 
-        // 5. Клік по картинці (швидке наближення x2.5 або скидання)
         modalImgEl.onclick = function(e) {
             e.stopPropagation();
             if (currentZoom > 1) {
