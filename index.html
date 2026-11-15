@@ -467,17 +467,25 @@
             margin: 0 !important;
         }
 
-        /* 4. АДАПТАЦІЯ ДЛЯ ТЕЛЕФОНА: Повне коло вівтаря без обриву + повноекранні руни */
         @media (max-width: 768px) {
-            body::before {
-                /* Масштабуємо так, щоб усе золоте коло з рунами повністю помістилося в екран телефона */
-                background-size: 155% auto !important;
-                background-position: center 42% !important;
-                /* Маска плавно розчиняє верхній і нижній край картинки 16:9 у смарагдовому фоні без різкої лінії обриву */
-                -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 82%, transparent 100%);
-                mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 82%, transparent 100%);
+            body {
+                /* 1. Накладаємо градієнт ПОВЕРХ картинки, який плавно стирає її межу на висоті 38vh */
+                background-image: 
+                    linear-gradient(to bottom, rgba(6, 24, 17, 0) 15vh, #061811 38vh), 
+                    url('image_10.jpg') !important;
+                
+                /* 2. Розміри: перший для градієнта (на всю сторінку), другий для картинки (140% ширини, щоб руни були крупними) */
+                background-size: 100% 100%, 140% auto !important; 
+                
+                /* 3. Позиції: градієнт зверху, картинку опускаємо на 10px */
+                background-position: left top, center 10px !important;
+                
+                background-repeat: no-repeat !important;
+                background-color: #061811 !important;
+                background-attachment: scroll !important;
             }
 
+            /* Повноекранні руни залишаються без змін */
             #modalRuneImg {
                 max-width: 98vw !important;
                 max-height: 94vh !important;
