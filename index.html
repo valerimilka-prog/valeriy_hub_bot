@@ -39,6 +39,11 @@
             margin: 0;
             padding: 0;
             background-color: var(--bg-emerald);
+            background-image: url('image_10.jpg');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             color: var(--text-main);
             font-family: var(--font-body);
             font-size: 18px;
@@ -48,22 +53,18 @@
             position: relative;
         }
 
-        /* ==========================================================================
-           ФОНОВИЙ ВІВТАР: ПК (image_10.jpg) та СМАРТФОН (image_10_mobile.jpg)
-           ========================================================================== */
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            background-color: var(--bg-emerald);
-            /* На ПК: верхній шар (contain) гарантує, що все коло з рунами 100% влізає по висоті і ширині без обрізань,
-               а нижній шар (cover) заповнює зелений космічний фон по краях широкого монітора */
-            background-image: url('image_10.jpg'), url('image_10.jpg');
-            background-repeat: no-repeat, no-repeat;
-            background-position: center center, center center;
-            background-size: contain, cover;
-            pointer-events: none;
+        /* 
+           Прибираємо зайві псевдоелементи, які накладалися один на одного!
+           Тепер фоном керує єдиний, надійний та чистий клас body 
+        */
+
+        @media (max-width: 768px) {
+            body {
+                background-image: url('image_10_mobile.jpg') !important;
+                background-size: cover !important;
+                background-position: center center !important;
+                background-attachment: scroll !important; /* Уникаємо мобільних глюків з фіксацією */
+            }
         }
 
         @media (max-width: 768px) {
