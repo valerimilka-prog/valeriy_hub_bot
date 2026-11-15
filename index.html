@@ -411,14 +411,29 @@
             background: var(--bg-emerald);
             border: 1px solid var(--gold-primary);
             border-radius: 16px;
-            max-width: 750px; /* Збільшено ширину вікна для ПК */
-            width: 95%;
+            max-width: 800px; /* Розширено для ПК */
+            width: 90%;
             max-height: 95vh;
             overflow-y: auto;
             padding: 15px;
             text-align: center;
             position: relative;
             box-shadow: 0 0 40px rgba(0,0,0,0.95);
+        }
+
+        /* ОЦЕЙ БЛОК ВИРІШУЄ ПРОБЛЕМУ НА ТЕЛЕФОНІ */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 98% !important;       /* Максимальна ширина на телефоні */
+                max-width: 98% !important; 
+                padding: 10px !important;    /* Менші відступи по краях */
+                margin: 5px auto !important; 
+            }
+            
+            #modalRuneImg {
+                max-height: 85vh !important; /* Дозволяємо карті витягнутися */
+                width: 100% !important;
+            }
         }
 
         #modalRuneImg {
