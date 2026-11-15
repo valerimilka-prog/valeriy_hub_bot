@@ -38,15 +38,8 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #061811;
-            /* ТІЛЬКИ картинка, без жодних додаткових фільтрів чи градієнтів */
-            background-image: url('image_10.jpg'); 
-            
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            
+            background-color: #04120c !important; /* Глибокий смарагдовий колір основи */
+            background-image: none !important;    /* Прибираємо картинку з body, щоб вона не глючила на мобільному */
             color: var(--text-main);
             font-family: var(--font-body);
             font-size: 18px;
@@ -54,6 +47,21 @@
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
+        }
+
+        /* ІЗОЛЬОВАНИЙ ФОНОВИЙ ВІВТАР (Працює ідеально і на ПК, і в Telegram) */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background-color: #04120c;
+            background-image: radial-gradient(circle at center, rgba(4, 18, 12, 0.2) 0%, rgba(2, 8, 5, 0.65) 100%), url('image_10.jpg');
+            background-repeat: no-repeat;
+            background-position: center center;
+            /* На ПК прив'язуємо до ВИСОТИ екрана (98%), щоб верхні і нижні руни НІКОЛИ не обрізалися */
+            background-size: auto 98vh; 
+            pointer-events: none;
         }
         .bg-heraldic-center {
             position: fixed;
@@ -459,8 +467,17 @@
             margin: 0 !important;
         }
 
-        /* 4. АДАПТАЦІЯ ДЛЯ ТЕЛЕФОНА (тільки повноекранні руни, фон не чіпаємо!) */
+        /* 4. АДАПТАЦІЯ ДЛЯ ТЕЛЕФОНА: Повне коло вівтаря без обриву + повноекранні руни */
         @media (max-width: 768px) {
+            body::before {
+                /* Масштабуємо так, щоб усе золоте коло з рунами повністю помістилося в екран телефона */
+                background-size: 155% auto !important;
+                background-position: center 42% !important;
+                /* Маска плавно розчиняє верхній і нижній край картинки 16:9 у смарагдовому фоні без різкої лінії обриву */
+                -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 82%, transparent 100%);
+                mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 82%, transparent 100%);
+            }
+
             #modalRuneImg {
                 max-width: 98vw !important;
                 max-height: 94vh !important;
@@ -472,7 +489,6 @@
                 font-size: 14px !important;
             }
         }
-
         #modalRuneImg {
             width: auto;
             max-width: 100%;
