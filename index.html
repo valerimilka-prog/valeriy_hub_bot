@@ -459,8 +459,14 @@
             margin: 0 !important;
         }
 
-        /* 4. На телефоні розтягуємо саму карту на весь екран */
+        /* 4. АДАПТАЦІЯ ДЛЯ ТЕЛЕФОНА: і вівтар на фоні, і картка руни */
         @media (max-width: 768px) {
+            body {
+                background-attachment: scroll !important;
+                background-size: 165% auto !important;
+                background-position: center 80px !important;
+                background-color: #04120c !important;
+            }
             #modalRuneImg {
                 max-width: 98vw !important;
                 max-height: 94vh !important;
@@ -470,18 +476,6 @@
                 bottom: 16px !important;
                 padding: 7px 26px !important;
                 font-size: 14px !important;
-            }
-        }
-            #modalRuneImg {
-                width: 100vw !important; /* Картинка на 100% ширини телефону */
-                max-width: 100vw !important;
-                height: auto !important;
-                max-height: 85vh !important;
-                border: none !important;
-            }
-            .modal-content button {
-                margin-top: auto !important;
-                margin-bottom: 20px !important;
             }
         }
 
