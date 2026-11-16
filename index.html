@@ -1137,9 +1137,12 @@
         try {
             const ref = doc(db, "users", uid);
             const snap = await getDoc(ref);
-            let current = (snap.exists() && snap.data().dreamsLeft !== undefined) ? snap.data().dreamsLeft : 0;
-            await setDoc(ref, { dreamsLeft: current + amount, unlimitedAccess: false }, { merge: true });
-            msg.innerText = `✅ Нараховано +${amount}. Усього спроб у клієнта: ${current + amount}`;
+            // Примусово робимо числом (Number), щоб не було збоїв
+            let current = (snap.exists() && snap.data().dreamsLeft !== undefined) ? Number(snap.data().dreamsLeft) : 0;
+            
+            // Нараховуємо спроби і примусово вимикаємо тимчасовий безліміт, якщо він був
+            await setDoc(ref, { dreamsLeft: current + amount, unlimitedAccess: false, unlimitedUntil: 0 }, { merge: true });
+            msg.innerText = `✅ Нараховано +${amount}. Усього спроб: ${current + amount}`;
             msg.style.color = "#10b981";
         } catch(e) { msg.innerText = "❌ Помилка запису в базу"; }
     };
@@ -1148,10 +1151,12 @@
         const uid = document.getElementById('targetUserId').value.trim();
         const days = parseInt(document.getElementById('vipDays').value.trim());
         const msg = document.getElementById('adminMsg');
+        
         if (!uid || isNaN(days) || days <= 0) { msg.innerText = "❌ Введіть ID та кількість днів!"; return; }
         try {
-            const until = Date.now() + (days * 86400000);
-            await setDoc(doc(db, "users", uid), { unlimitedUntil: until, unlimitedAccess: false }, { merge: true });
+            const until = Date.now() + (days * 86400000); // 86400000 мс = 1 доба
+            // Даємо безліміт і обнуляємо звичайні спроби, щоб логіка Сонника не плуталась
+            await setDoc(doc(db, "users", uid), { unlimitedUntil: until, unlimitedAccess: false, dreamsLeft: 0 }, { merge: true });
             msg.innerText = `👑 Безліміт на ${days} дн. успішно активовано!`;
             msg.style.color = "#d4af37";
         } catch(e) { msg.innerText = "❌ Помилка бази"; }
